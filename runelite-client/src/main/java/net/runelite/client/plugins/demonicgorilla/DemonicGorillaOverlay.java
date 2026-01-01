@@ -49,7 +49,7 @@ class DemonicGorillaOverlay extends Overlay
     private static final Color COLOR_ICON_BACKGROUND = new Color(0, 0, 0, 128);
     private static final Color COLOR_ICON_BORDER = new Color(0, 0, 0, 255);
     private static final Color COLOR_ICON_BORDER_FILL = new Color(219, 175, 0, 255);
-    private static final int OVERLAY_ICON_DISTANCE = 50;
+    private static final int OVERLAY_ICON_DISTANCE = 100;
     private static final int OVERLAY_ICON_MARGIN = 8;
     private static final int BG_PADDING = 4;
 
