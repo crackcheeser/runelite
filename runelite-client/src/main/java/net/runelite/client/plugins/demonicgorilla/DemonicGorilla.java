@@ -31,7 +31,6 @@ import lombok.Setter;
 import net.runelite.api.Actor;
 import net.runelite.api.HeadIcon;
 import net.runelite.api.NPC;
-import net.runelite.api.NPCComposition;
 import net.runelite.api.coords.WorldArea;
 
 class DemonicGorilla
@@ -149,11 +148,8 @@ class DemonicGorilla
 
     HeadIcon getOverheadIcon()
     {
-        NPCComposition composition = npc.getComposition();
-        if (composition != null)
-        {
-            return composition.getOverheadIcon();
-        }
+        // TODO: Map NPC overhead sprite/archive IDs to a HeadIcon equivalent if needed.
+        // The current API exposes arrays of overhead archive/sprite ids, but no direct HeadIcon accessor.
         return null;
     }
 }

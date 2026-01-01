@@ -38,6 +38,7 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.HeadIcon;
 import net.runelite.api.Hitsplat;
+import net.runelite.api.HitsplatID;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.Projectile;
@@ -76,14 +77,14 @@ public class DemonicGorillaPlugin extends Plugin
      * - Flinch/damage scenarios delay attacks and update counters as expected.
      */
     private static final Set<Integer> GORILLA_IDS = ImmutableSet.of(
-        // Stated compatibility set 7144-7149 plus 7152; adjust if constants move.
-        NpcID.DEMONIC_GORILLA, // 7144
-        NpcID.DEMONIC_GORILLA_7145,
-        NpcID.DEMONIC_GORILLA_7146,
-        NpcID.DEMONIC_GORILLA_7147,
-        NpcID.DEMONIC_GORILLA_7148,
-        NpcID.DEMONIC_GORILLA_7149,
-        NpcID.DEMONIC_GORILLA_7152
+        // Stated compatibility set 7144-7149 plus 7152; current API names use MM2 prefix.
+        NpcID.MM2_DEMON_GORILLA_1_MELEE,  // 7144
+        NpcID.MM2_DEMON_GORILLA_1_RANGED, // 7145
+        NpcID.MM2_DEMON_GORILLA_1_MAGIC,  // 7146
+        NpcID.MM2_DEMON_GORILLA_2_MELEE,  // 7147
+        NpcID.MM2_DEMON_GORILLA_2_RANGED, // 7148
+        NpcID.MM2_DEMON_GORILLA_2_MAGIC,  // 7149
+        NpcID.MM2_DEMON_GORILLA_NONCOMBAT // 7152
     );
 
     @Inject
@@ -245,8 +246,8 @@ public class DemonicGorillaPlugin extends Plugin
             DemonicGorilla gorilla = gorillas.get(event.getActor());
             if (gorilla != null)
             {
-                Hitsplat.HitsplatType hitsplatType = event.getHitsplat().getHitsplatType();
-                if (hitsplatType == Hitsplat.HitsplatType.BLOCK || hitsplatType == Hitsplat.HitsplatType.DAMAGE)
+                int hitsplatType = event.getHitsplat().getHitsplatType();
+                if (isDamageOrBlockHitsplat(hitsplatType))
                 {
                     gorilla.setTakenDamageRecently(true);
                 }
@@ -318,15 +319,15 @@ public class DemonicGorillaPlugin extends Plugin
         {
             int animationId = gorilla.getNpc().getAnimation();
 
-            if (animationId == AnimationID.DEMONIC_GORILLA_MELEE_ATTACK)
+            if (animationId == AnimationID.DEMONIC_GORILLA_PUNCH)
             {
                 onGorillaAttack(gorilla, DemonicGorilla.AttackStyle.MELEE);
             }
-            else if (animationId == AnimationID.DEMONIC_GORILLA_MAGIC_ATTACK)
+            else if (animationId == AnimationID.DEMONIC_GORILLA_MAGIC)
             {
                 onGorillaAttack(gorilla, DemonicGorilla.AttackStyle.MAGIC);
             }
-            else if (animationId == AnimationID.DEMONIC_GORILLA_RANGED_ATTACK)
+            else if (animationId == AnimationID.DEMONIC_GORILLA_RANGE)
             {
                 onGorillaAttack(gorilla, DemonicGorilla.AttackStyle.RANGED);
             }
@@ -378,12 +379,36 @@ public class DemonicGorillaPlugin extends Plugin
 
             DemonicGorilla gorilla = attack.getAttacker();
             MemorizedPlayer target = memorizedPlayers.get(attack.getTarget());
-            if (target == null || target.getRecentHitsplats().stream().anyMatch(h -> h.getHitsplatType() == Hitsplat.HitsplatType.BLOCK))
+            if (target == null || target.getRecentHitsplats().stream().anyMatch(h -> h.getHitsplatType() == HitsplatID.BLOCK_ME || h.getHitsplatType() == HitsplatID.BLOCK_OTHER))
             {
                 gorilla.setAttacksUntilSwitch(Math.max(0, gorilla.getAttacksUntilSwitch() - 1));
             }
             it.remove();
         }
+    }
+
+    private boolean isDamageOrBlockHitsplat(int hitsplatType)
+    {
+        return hitsplatType == HitsplatID.BLOCK_ME
+            || hitsplatType == HitsplatID.BLOCK_OTHER
+            || hitsplatType == HitsplatID.DAMAGE_ME
+            || hitsplatType == HitsplatID.DAMAGE_OTHER
+            || hitsplatType == HitsplatID.DAMAGE_ME_CYAN
+            || hitsplatType == HitsplatID.DAMAGE_OTHER_CYAN
+            || hitsplatType == HitsplatID.DAMAGE_ME_ORANGE
+            || hitsplatType == HitsplatID.DAMAGE_OTHER_ORANGE
+            || hitsplatType == HitsplatID.DAMAGE_ME_YELLOW
+            || hitsplatType == HitsplatID.DAMAGE_OTHER_YELLOW
+            || hitsplatType == HitsplatID.DAMAGE_ME_WHITE
+            || hitsplatType == HitsplatID.DAMAGE_OTHER_WHITE
+            || hitsplatType == HitsplatID.DAMAGE_MAX_ME
+            || hitsplatType == HitsplatID.DAMAGE_MAX_ME_CYAN
+            || hitsplatType == HitsplatID.DAMAGE_MAX_ME_ORANGE
+            || hitsplatType == HitsplatID.DAMAGE_MAX_ME_YELLOW
+            || hitsplatType == HitsplatID.DAMAGE_MAX_ME_WHITE
+            || hitsplatType == HitsplatID.DAMAGE_ME_POISE
+            || hitsplatType == HitsplatID.DAMAGE_OTHER_POISE
+            || hitsplatType == HitsplatID.DAMAGE_MAX_ME_POISE;
     }
 
     private void updatePlayers()
